@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { ChevronsLeft, MenuIcon } from "lucide-react";
-import React, { ElementRef, useRef, useState } from "react";
+import React, { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 const Sidebar = () => {
@@ -12,8 +12,16 @@ const Sidebar = () => {
   const navbarRef = useRef<ElementRef<"div">>(null);
   const isResizing = useRef(false);
 
-  const [isCollapse, setIsCollapse] = useState(false);
+  const [isCollapse, setIsCollapse] = useState(isMobile);
   const [isResetting, setisResetting] = useState(false);
+
+  useEffect(() => {
+    if (isMobile) {
+      collapse();
+    } else {
+      reset();
+    }
+  }, [isMobile]);
 
   const collapse = () => {
     if (sidebarRef.current && navbarRef.current) {
@@ -33,9 +41,11 @@ const Sidebar = () => {
       setIsCollapse(false);
       setisResetting(true);
 
-      sidebarRef.current.style.width = "240px";
-      navbarRef.current.style.width = "calc(100% - 240px)";
-      navbarRef.current.style.left = "240px";
+      sidebarRef.current.style.width = isMobile ? "100%" : "240px";
+      navbarRef.current.style.width = isMobile ? "0" : "calc(100% - 240px)";
+      navbarRef.current.style.left = isMobile ? "100%" : "240px";
+
+      setTimeout(() => (setisResetting(false), 300));
     }
   };
 
@@ -84,7 +94,10 @@ const Sidebar = () => {
         ref={sidebarRef}
       >
         <div
-          className="h-6 w-6 text-muted-foreground rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 absolute top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition"
+          className={cn(
+            "h-6 w-6 text-muted-foreground rounded-sm hover:bg-neutral-300 dark:hover:bg-neutral-600 absolute top-3 right-2 opacity-0 group-hover/sidebar:opacity-100 transition",
+            isMobile && "opacity-100"
+          )}
           role="button"
           onClick={collapse}
         >
@@ -99,7 +112,8 @@ const Sidebar = () => {
       <div
         className={cn(
           "absolute top-0 z-50 left-60 w-[calc(100% - 240px)]",
-          isResetting && "transition-all ease-in duration-300"
+          isResetting && "transition-all ease-in duration-300",
+          isMobile && "w-full left-0"
         )}
         ref={navbarRef}
       >
